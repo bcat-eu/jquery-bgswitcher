@@ -1,0 +1,45 @@
+#bg-body {
+    background: none repeat scroll 0 0 #D2D2D0;
+    height: 200%;
+    left: -50%;
+    position: fixed;
+    top: -50%;
+    width: 200%;
+}
+#bg-body img {
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    min-height: 50%;
+    min-width: 50%;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+#wrapper {
+	position:relative;
+	width:980px;
+	height:600px;
+	margin:0 auto;
+}
+#info {
+	position:absolute;
+	width:400px;
+	height:auto;
+	bottom:0;
+	right:0;
+	background:#ccc;
+	border-radius:20px;
+	padding:15px;
+	box-shadow:10px 10px 20px #333;
+}
+#info h1 {
+	margin:10px 0;
+	color:#5d5d5d;
+	font-size:22px;
+}
+#info p {
+	margin:0 0 7px 0;
+	color:#5d5d5d;
+	font-size:15px;
+}
