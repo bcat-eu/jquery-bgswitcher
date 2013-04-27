@@ -15,7 +15,7 @@
         "preload",
         "unobtrusive"
     ],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": {
         "name": "Yuriy Davats",
         "url": "http://www.bcat.eu"
@@ -23,11 +23,11 @@
     "licenses": [
         {
             "type": "MIT",
-            "url": "https://github.com/jquery/jquery-color/blob/2.1.2/MIT-LICENSE.txt"
+            "url": "http://opensource.org/licenses/MIT"
         },
         {
             "type": "GPL",
-            "url": "https://github.com/jquery/jquery-color/blob/2.1.2/MIT-LICENSE.txt"
+            "url": "http://www.gnu.org/licenses/gpl.html"
         }
     ],
     "homepage": "http://www.bcat.eu/blog/jquery-unobtrusive-background-image-switcher/",
