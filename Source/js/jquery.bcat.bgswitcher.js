@@ -1,6 +1,6 @@
 /**
  * bcat BG Switcher - unobtrusive background image switcher
- * @version 1.0.0
+ * @version 1.1.0
  * @jQuery version 1.2+
  * @author Yuriy Davats http://www.bcat.eu
  * @copyright Yuriy Davats
@@ -21,83 +21,80 @@
 
     // Plugin constructor
     function Plugin(element, options) {
-        this.element = element;
-
-        // set default options
-        this.options = $.extend({}, defaults, options);
-
+                
         this._defaults = defaults;
         this._name = pluginName;
 
-        this.init();
+        this.init(element, options);
     }
 
     Plugin.prototype = {
-        init: function() {
-            this.currentIndex = this.options.startIndex;
-            this.currentImage = this.preloadImage(this.options, this.currentIndex);
+        init: function(element, options) {  
+            var instance = {};
+            instance.currentIndex = options.startIndex;
+            instance.currentImage = this.preloadImage(element, options, instance.currentIndex);
             // fix scope
             var that = this;
             // append image on load and start the slide show
-            this.currentImage.load(function() {
-                that.currentImage.appendTo(that.element);
-                that.currentImage.fadeIn(that.options.speed);
-                that.currentIndex++;
-                if (that.options.urls[that.currentIndex]) {
-                    that.runSlideShow();
+            instance.currentImage.load(function() {
+                instance.currentImage.appendTo(element);
+                instance.currentImage.fadeIn(options.speed);
+                instance.currentIndex++;
+                if (options.urls[instance.currentIndex]) {
+                    that.runSlideShow(element, options, instance);
                 }                
             });
         },
-        runSlideShow: function() {
+        runSlideShow: function(element, options, instance) {
             // fix scope
             var that = this;
             // update image periodically
             setInterval(function() {
-                that.updateImage();
-            }, this.options.timeout);
+                that.updateImage(element, options, instance);
+            }, options.timeout);
         },
-        updateImage: function() {
+        updateImage: function(element, options, instance) {
             // load an image and add it to DOM or show the new one and hide the previous one
 
             // set index to 0 at the end of array
-            if (!this.options.urls[this.currentIndex]) {
-                this.currentIndex = 0;
+            if (!options.urls[instance.currentIndex]) {
+                instance.currentIndex = 0;
             }
-            var nextImage = $('#bg-image-' + this.currentIndex);
+                        
+            var nextImage = $('#'+ element.id + instance.currentIndex);
             if (nextImage.length) {
                 // image found in DOM, changing visibility                
-                this.currentImage.fadeOut(this.options.speed);
-                nextImage.fadeIn(this.options.speed);
+                instance.currentImage.fadeOut(options.speed);
+                nextImage.fadeIn(options.speed);
             } else {
                 // image was not loaded yet, loading and showing it                
-                nextImage = this.preloadImage(this.options, this.currentIndex);
-                this.swapPreloadedImages(this.currentImage, nextImage);
+                nextImage = this.preloadImage(element, options, instance.currentIndex);
+                this.swapPreloadedImages(instance.currentImage, nextImage, element, options);
             }
-            this.currentImage = nextImage;
-            this.currentIndex++;
+            instance.currentImage = nextImage;
+            instance.currentIndex++;
         },
-        preloadImage: function(options, index, style) {
+        preloadImage: function(element, options, index, style) {
             // preload image and return it as a jQuery object
             if (!style) {
                 style = 'display: none;';
             }
+                                                
             var img = $('<img />');
             img.attr({
-                'id': 'bg-image-' + index,
+                'id': element.id + index,
                 'src': options.urls[index],
                 'alt': options.alt,
                 'style': style
             });
             return img;
         },
-        swapPreloadedImages: function(currentImage, nextImage) {
-            // fix scope
-            var that = this;
+        swapPreloadedImages: function(currentImage, nextImage, element, options) {            
             // swap images on load
             nextImage.load(function() {
-                nextImage.appendTo(that.element);
-                currentImage.fadeOut(that.options.speed);
-                nextImage.fadeIn(that.options.speed);
+                nextImage.appendTo(element);
+                currentImage.fadeOut(options.speed);
+                nextImage.fadeIn(options.speed);
             });
         }
     };
@@ -105,8 +102,10 @@
     // Plugin wrapper preventing against multiple instantiations
     $.fn[pluginName] = function(options) {
         return this.each(function() {
-            if (!$.data(this, "plugin_" + pluginName)) {
-                $.data(this, "plugin_" + pluginName, new Plugin(this, options));
+            if (!$.data(this, "plugin_" + pluginName)) {                
+                var localOptions = $.extend({}, defaults, options);                
+                $.data(this, "plugin_" + pluginName, new Plugin(this, localOptions));                
+                
             }
         });
     };
