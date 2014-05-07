@@ -1,6 +1,6 @@
 /**
  * bcat BG Switcher - unobtrusive background image switcher
- * @version 1.2.0
+ * @version 1.3.2
  * @jQuery version 1.2+
  * @author Yuriy Davats http://www.bcat.eu
  * @copyright Yuriy Davats
@@ -17,7 +17,8 @@
         timeout: 12000, // time between image changes
         alt: 'Picture', // alt for consistency
         speed: 1000, // animation speed        
-        links: false // generate a link for each image
+        links: false, // generate a link for each image
+        prevnext: false, // generate previous and next links
     };
 
     // Plugin constructor
@@ -42,13 +43,20 @@
                 instance.currentImage.fadeIn(options.speed);
                 instance.currentIndex++;
                 if (options.urls[instance.currentIndex]) {
-                    if (options.links) {
+                    
+                    if ((options.links) || (options.prevnext)) {
                         var loaderDiv = $('<div />').attr({
                             'id': element.id + '-loader',
                             'style': 'display: none;'
                         });
-                        loaderDiv.appendTo(element);                        
+                        loaderDiv.appendTo(element);
+                    }
+
+                    if (options.links) {
                         that.generateLinks(element, options, instance);
+                    }
+                    if (options.prevnext) {
+                        that.generatePrevNext(element, options, instance);
                     }
                     that.runSlideShow(element, options, instance);
                 }
@@ -148,13 +156,63 @@
                 instance.linkParent.append(link);
             });
 
-            instance.linkParent.insertAfter(element);
+            instance.linkParent.appendTo(element);
             instance.linkParent.fadeIn(options.speed);
+
+        },
+        generatePrevNext: function(element, options, instance) {
+            // generate previous / next links on load
+            instance.prevnextParent = $('<div />');
+            instance.prevnextParent.attr({
+                'id': element.id + '-prevnext-wrapper',
+                'style': 'display: none;'
+            });
+
+            // fix scope
+            var that = this;
+
+            var linkPrevious = $('<a />');
+            linkPrevious.attr({
+                'id': element.id + '-previous-link',
+                'href': '#',
+                'class': element.id + '-prevnext-link'
+            });
+            linkPrevious.click(function(event) {
+                event.preventDefault();
+                var index = instance.currentIndex - 2;
+                // set index to last one at the beginning of array
+                if (!options.urls[index]) {
+                    index = options.urls.length - 1;
+                }
+                that.switchImageTo(element, options, instance, index);
+            });
+            instance.prevnextParent.append(linkPrevious);
+
+            var linkNext = $('<a />');
+            linkNext.attr({
+                'id': element.id + '-next-link',
+                'href': '#',
+                'class': element.id + '-prevnext-link'
+            });
+            linkNext.click(function(event) {
+                event.preventDefault();
+                var index = instance.currentIndex;
+                // set index to last element at the beginning of array
+                if (!options.urls[index]) {
+                    index = 0;
+                }
+                that.switchImageTo(element, options, instance, index);
+            });
+            instance.prevnextParent.append(linkNext);
+
+
+            instance.prevnextParent.appendTo(element);
+            instance.prevnextParent.fadeIn(options.speed);
 
         },
         switchImageTo: function(element, options, instance, index) {
             // switch to the given image using array index and reset slideshow
-            
+
             if (!options.urls[index]) {
                 console.log('can not switch to a non-existent element');
                 return;
@@ -164,7 +222,7 @@
 
             // prevent action on active image
             if (nextImage.attr('id') !== instance.currentImage.attr('id')) {
-                
+
                 instance.currentIndex = index;
 
                 // stop slide show
@@ -180,7 +238,10 @@
                     this.swapPreloadedImages(instance.currentImage, nextImage, element, options, true);
                 }
 
-                this.setActiveLink(element, options, instance);
+                if (options.links) {
+                    this.setActiveLink(element, options, instance);
+                }
+
                 instance.currentImage = nextImage;
                 instance.currentIndex++;
 
