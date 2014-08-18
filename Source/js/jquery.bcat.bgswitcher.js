@@ -20,9 +20,9 @@
         speed: 1000, // animation speed        
         links: false, // generate a link for each image
         prevnext: false, // generate previous and next links
-		  fade_first: true, // fade in first image
-		  preserve_state: false, // save state to cookie
-		  cookie: 'bcatBGSwitcher' // name for cookie if state saving is enabled
+        fade_first: true, // fade in first image
+        preserve_state: false, // save state to cookie
+        cookie: 'bcatBGSwitcher' // name for cookie if state saving is enabled
     };
 
     // Plugin constructor
@@ -38,16 +38,16 @@
         init: function(element, options) {
             var instance = {};
 				
-				if (options.preserve_state && $.cookie == undefined) {
-					console.log('preserve state option requires cookie plugin (https://github.com/carhartl/jquery-cookie)');
-					options.preserve_state = false;
-				}
+            if (options.preserve_state && $.cookie == undefined) {
+                console.log('preserve state option requires cookie plugin (https://github.com/carhartl/jquery-cookie)');
+                options.preserve_state = false;
+            }
 
-				if (options.preserve_state) {
-					if ($.cookie(options.cookie) != undefined) {
-						options.startIndex = $.cookie(options.cookie);
-					}
-				}
+            if (options.preserve_state) {
+                if ($.cookie(options.cookie) != undefined) {
+                    options.startIndex = $.cookie(options.cookie);
+                }
+            }
 				
             instance.currentIndex = options.startIndex;
             instance.currentImage = this.preloadImage(element, options, instance.currentIndex);
@@ -56,11 +56,13 @@
             // append image on load and start the slide show
             instance.currentImage.load(function() {
                 instance.currentImage.appendTo(element);
-					 if (options.fade_first) {
-                	instance.currentImage.fadeIn(options.speed);
-					 } else {
-                	instance.currentImage.show();
-					 }
+	
+                if (options.fade_first) {
+                    instance.currentImage.fadeIn(options.speed);
+                } else {
+                    instance.currentImage.show();
+                }
+
                 instance.currentIndex++;
                 if (options.urls[instance.currentIndex]) {
                     
@@ -112,9 +114,9 @@
                 this.setActiveLink(element, options, instance);
             }
 
-				if (options.preserve_state) {
-					$.cookie(options.cookie, instance.currentIndex);
-				}
+            if (options.preserve_state) {
+                $.cookie(options.cookie, instance.currentIndex);
+            }
 
             instance.currentImage = nextImage;
             instance.currentIndex++;
@@ -229,8 +231,6 @@
                 that.switchImageTo(element, options, instance, index);
             });
             instance.prevnextParent.append(linkNext);
-
-
             instance.prevnextParent.appendTo(element);
             instance.prevnextParent.fadeIn(options.speed);
 
