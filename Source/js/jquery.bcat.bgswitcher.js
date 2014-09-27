@@ -1,9 +1,10 @@
 /**
  * bcat BG Switcher - unobtrusive background image switcher
- * @version 1.3.2
+ * @version 1.4.0
  * @jQuery version 1.2+
  * @author Yuriy Davats http://www.bcat.eu
  * @copyright Yuriy Davats
+ * @modified by Frank Lamozik (LDSign)
  */
 
 ;
@@ -19,6 +20,9 @@
         speed: 1000, // animation speed        
         links: false, // generate a link for each image
         prevnext: false, // generate previous and next links
+        fade_first: true, // fade in first image
+        preserve_state: false, // save state to cookie
+        cookie: 'bcatBGSwitcher' // name for cookie if state saving is enabled
     };
 
     // Plugin constructor
@@ -33,6 +37,18 @@
     Plugin.prototype = {
         init: function(element, options) {
             var instance = {};
+				
+            if (options.preserve_state && $.cookie == undefined) {
+                console.log('preserve state option requires cookie plugin (https://github.com/carhartl/jquery-cookie)');
+                options.preserve_state = false;
+            }
+
+            if (options.preserve_state) {
+                if ($.cookie(options.cookie) != undefined) {
+                    options.startIndex = $.cookie(options.cookie);
+                }
+            }
+				
             instance.currentIndex = options.startIndex;
             instance.currentImage = this.preloadImage(element, options, instance.currentIndex);
             // fix scope
@@ -40,7 +56,13 @@
             // append image on load and start the slide show
             instance.currentImage.load(function() {
                 instance.currentImage.appendTo(element);
-                instance.currentImage.fadeIn(options.speed);
+	
+                if (options.fade_first) {
+                    instance.currentImage.fadeIn(options.speed);
+                } else {
+                    instance.currentImage.show();
+                }
+
                 instance.currentIndex++;
                 if (options.urls[instance.currentIndex]) {
                     
@@ -91,6 +113,11 @@
             if (options.links) {
                 this.setActiveLink(element, options, instance);
             }
+
+            if (options.preserve_state) {
+                $.cookie(options.cookie, instance.currentIndex);
+            }
+
             instance.currentImage = nextImage;
             instance.currentIndex++;
         },
@@ -204,8 +231,6 @@
                 that.switchImageTo(element, options, instance, index);
             });
             instance.prevnextParent.append(linkNext);
-
-
             instance.prevnextParent.appendTo(element);
             instance.prevnextParent.fadeIn(options.speed);
 
