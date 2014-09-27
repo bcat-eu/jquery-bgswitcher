@@ -4,6 +4,7 @@
  * @jQuery version 1.2+
  * @author Yuriy Davats http://www.bcat.eu
  * @copyright Yuriy Davats
+ * @modified by Frank Lamozik (LDSign)
  */
 
 ;
@@ -20,6 +21,9 @@
                 speed: 1000, // animation speed        
                 links: false, // generate a link for each image
                 prevnext: false, // generate previous and next links
+                fadeFirst: true, // fade in first image
+                preserveState: false, // save state to cookie, requires jQuery Cookie Plugin (https://github.com/carhartl/jquery-cookie)
+                cookie: 'bcatBGSwitcher', // name of the cookie if state saving is enabled
                 onFirstImageLoad: function() {
                 }, // callback after first image is loaded, "this" variable contains the image element
                 onInitComplete: function(options, instance) {
@@ -55,6 +59,18 @@
     Plugin.prototype = {
         init: function(element, options) {
             var instance = {};
+				
+            if (options.preserveState && $.cookie == undefined) {
+                console.log('Preserve state option requires cookie plugin (https://github.com/carhartl/jquery-cookie)');
+                options.preserveState = false;
+            }
+
+            if (options.preserveState) {
+                if ($.cookie(options.cookie) != undefined) {
+                    options.startIndex = $.cookie(options.cookie);
+                }
+            }
+				
             instance.currentIndex = options.startIndex;
             instance.currentImage = this.preloadImage(element, options, instance.currentIndex);
             // fix scope
@@ -62,7 +78,13 @@
             // append image on load and start the slide show
             instance.currentImage.load(function() {
                 instance.currentImage.appendTo(element);
-                instance.currentImage.fadeIn(options.speed);
+	
+                if (options.fadeFirst) {
+                    instance.currentImage.fadeIn(options.speed);
+                } else {
+                    instance.currentImage.show();
+                }
+
                 instance.currentIndex++;
 
                 // trigger onFirstImageLoad event
@@ -124,6 +146,11 @@
             if (options.links) {
                 this.setActiveLink(element, options, instance);
             }
+
+            if (options.preserveState) {
+                $.cookie(options.cookie, instance.currentIndex);
+            }
+
             instance.currentImage = nextImage;
             instance.currentIndex++;
         },
@@ -239,8 +266,6 @@
                 that.switchImageTo(element, options, instance, index);
             });
             instance.prevnextParent.append(linkNext);
-
-
             instance.prevnextParent.appendTo(element);
             instance.prevnextParent.fadeIn(options.speed);
 
