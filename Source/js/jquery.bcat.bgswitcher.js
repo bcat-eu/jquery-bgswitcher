@@ -1,6 +1,6 @@
 /**
  * bcat BG Switcher - unobtrusive background image switcher
- * @version 1.3.2
+ * @version 1.4.3
  * @jQuery version 1.2+
  * @author Yuriy Davats http://www.bcat.eu
  * @copyright Yuriy Davats
@@ -12,14 +12,36 @@
     // Default options
     var pluginName = "bcatBGSwitcher",
             defaults = {
-        urls: [], // urls array, should contain at least one image url       
-        startIndex: 0, // first image loaded
-        timeout: 12000, // time between image changes
-        alt: 'Picture', // alt for consistency
-        speed: 1000, // animation speed        
-        links: false, // generate a link for each image
-        prevnext: false, // generate previous and next links
-    };
+                urls: [], // urls array, should contain at least one image url       
+                startIndex: 0, // first image loaded
+                autoplay: true, // change image every [timeout] ms
+                timeout: 12000, // time between image changes
+                alt: 'Picture', // alt for consistency
+                speed: 1000, // animation speed        
+                links: false, // generate a link for each image
+                prevnext: false, // generate previous and next links
+                onFirstImageLoad: function() {
+                }, // callback after first image is loaded, "this" variable contains the image element
+                onInitComplete: function(options, instance) {
+                }, 
+                /** 
+                 * Callback after init function is done 
+                 * 
+                 * "this" variable contains plugin element
+                 * @param options - plugin options object
+                 * @param instance - plugin instance object
+                 */                
+                onGenerateEachLink: function($link, index, url) {
+                }
+                /** 
+                 * Callback on generation of each navigation link 
+                 * 
+                 * "this" variable contains plugin instance object
+                 * @param $link - jQuery object with the current link
+                 * @param index - current urls array index
+                 * @param url - the url of the specific image
+                 */
+            };
 
     // Plugin constructor
     function Plugin(element, options) {
@@ -42,8 +64,12 @@
                 instance.currentImage.appendTo(element);
                 instance.currentImage.fadeIn(options.speed);
                 instance.currentIndex++;
+
+                // trigger onFirstImageLoad event
+                options.onFirstImageLoad.call(this);
+
                 if (options.urls[instance.currentIndex]) {
-                    
+
                     if ((options.links) || (options.prevnext)) {
                         var loaderDiv = $('<div />').attr({
                             'id': element.id + '-loader',
@@ -58,9 +84,16 @@
                     if (options.prevnext) {
                         that.generatePrevNext(element, options, instance);
                     }
-                    that.runSlideShow(element, options, instance);
+
+                    if (options.autoplay) {
+                        that.runSlideShow(element, options, instance);
+                    }
                 }
+                
+                // trigger onInitComplete event
+                options.onInitComplete.call(element, options, instance);
             });
+                        
         },
         runSlideShow: function(element, options, instance) {
             // fix scope
@@ -153,6 +186,8 @@
                     event.preventDefault();
                     that.switchImageTo(element, options, instance, index);
                 });
+                // trigger onGenerateEachLink event
+                options.onGenerateEachLink.call(instance, link, index, value);
                 instance.linkParent.append(link);
             });
 
@@ -226,7 +261,9 @@
                 instance.currentIndex = index;
 
                 // stop slide show
-                clearInterval(instance.intervalId);
+                if (options.autoplay) {
+                    clearInterval(instance.intervalId);
+                }
 
                 if (nextImage.length) {
                     // image found in DOM, changing visibility                
@@ -248,9 +285,11 @@
                 // fix scope
                 var that = this;
                 // run slideshow again
-                instance.intervalId = setInterval(function() {
-                    that.updateImage(element, options, instance);
-                }, options.timeout);
+                if (options.autoplay) {
+                    instance.intervalId = setInterval(function() {
+                        that.updateImage(element, options, instance);
+                    }, options.timeout);
+                }
 
             }
 
