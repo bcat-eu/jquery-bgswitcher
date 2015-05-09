@@ -23,9 +23,9 @@
     "preload",
     "unobtrusive"
   ],
-  "dependencies": [
+  "dependencies": {
         "jquery": "~1.11"
-    ],
+    },
   "license": "MIT",
   "ignore": [
     
