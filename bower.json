@@ -1,6 +1,6 @@
 {
   "name": "bcat.bgswitcher",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "homepage": "https://github.com/bcat-eu/jquery-bgswitcher",
   "authors": [
     "Yuriy Davats"
@@ -24,7 +24,7 @@
     "unobtrusive"
   ],
   "dependencies": {
-        "jquery": "~1.7"
+        "jquery": "~1.11"
     },
   "license": "MIT",
   "ignore": [
