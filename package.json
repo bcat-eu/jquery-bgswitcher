@@ -1,0 +1,40 @@
+{
+  "name": "bcat.bgswitcher",
+  "title": "jQuery Unobtrusive Background Image Switcher",
+  "description": "jQuery plugin that makes it possible to use many heavier images as full screen background slider or image slider, while minimizing their influence on load times.",
+  "keywords": [
+    "jquery-plugin",
+    "ecosystem:jquery",
+    "animation",
+    "background",
+    "effect",
+    "fullscreen",
+    "image",
+    "lazy",
+    "lazyload",
+    "slider",
+    "switcher",
+    "preload",
+    "unobtrusive"
+  ],
+  "version": "2.0.0",
+  "author": {
+    "name": "Yuriy Davats",
+    "url": "http://www.bcat.eu"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    },
+    {
+      "type": "GPL",
+      "url": "http://www.gnu.org/licenses/gpl.html"
+    }
+  ],
+  "repository": "https://github.com/bcat-eu/jquery-bgswitcher",
+  "homepage": "http://www.bcat.eu/blog/jquery-unobtrusive-background-image-switcher/",
+  "dependencies": {
+    "jquery": "^1.11"
+  }
+}

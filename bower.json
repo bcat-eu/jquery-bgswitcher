@@ -24,7 +24,7 @@
     "unobtrusive"
   ],
   "dependencies": {
-        "jquery": "~1.11"
+        "jquery": "^1.11"
     },
   "license": "MIT",
   "ignore": [
