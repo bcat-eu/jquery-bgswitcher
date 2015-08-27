@@ -41,7 +41,7 @@ p {
     width: 200%;
     z-index: 1;
 }
-#bg-body > img {
+#bg-body > img, #bg-body > div.bg-body-html > img {
     bottom: 0;
     left: 0;
     margin: auto;

@@ -1,6 +1,6 @@
 /**
  * bcat BG Switcher - unobtrusive background image switcher
- * @version 1.4.3
+ * @version 2.0.0
  * @jQuery version 1.2+
  * @author Yuriy Davats http://www.bcat.eu
  * @copyright Yuriy Davats
@@ -13,7 +13,9 @@
     // Default options
     var pluginName = "bcatBGSwitcher",
             defaults = {
-                urls: [], // urls array, should contain at least one image url       
+                urls: [], // urls array, should contain at least one image url
+                // Instead of strings this array can also contain objects with custom data,
+                // in this case each object must contain an src property with image url
                 startIndex: 0, // first image loaded
                 autoplay: true, // change image every [timeout] ms
                 timeout: 12000, // time between image changes
@@ -24,27 +26,45 @@
                 fadeFirst: true, // fade in first image
                 preserveState: false, // save state to cookie, requires jQuery Cookie Plugin (https://github.com/carhartl/jquery-cookie)
                 cookie: 'bcatBGSwitcher', // name of the cookie if state saving is enabled
+
+                // callback after first image is loaded, "this" variable contains the image element
                 onFirstImageLoad: function() {
-                }, // callback after first image is loaded, "this" variable contains the image element
-                onInitComplete: function(options, instance) {
-                }, 
-                /** 
-                 * Callback after init function is done 
-                 * 
+                },
+
+                /**
+                 * Callback after init function is done
+                 *
                  * "this" variable contains plugin element
                  * @param options - plugin options object
                  * @param instance - plugin instance object
-                 */                
-                onGenerateEachLink: function($link, index, url) {
-                }
-                /** 
-                 * Callback on generation of each navigation link 
-                 * 
+                 */
+                onInitComplete: function(options, instance) {
+                },
+                /**
+                 * Callback on generation of each navigation link
+                 *
                  * "this" variable contains plugin instance object
                  * @param $link - jQuery object with the current link
                  * @param index - current urls array index
                  * @param url - the url of the specific image
                  */
+                onGenerateEachLink: function($link, index, url) {
+                },
+
+                /**
+                 * Callback on generation of each image
+                 * only called if objects instead of strings passed in urls array
+                 *
+                 * "this" variable contains plugin instance object
+                 * @param $html - jQuery object with the generated image html
+                 * @param data - data object for the current image (passed in urls array)
+                 *
+                 * @returns desired custom HTML to show instead of plain image
+                 */
+                onGenerateEachImage: function($html, data) {
+                    return $html;
+                }
+
             };
 
     // Plugin constructor
@@ -76,13 +96,17 @@
             // fix scope
             var that = this;
             // append image on load and start the slide show
-            instance.currentImage.load(function() {
-                instance.currentImage.appendTo(element);
-	
+
+            var domElement = this.getDomElement(instance.currentImage);
+
+            instance.currentImage.img.load(function() {
+
+                domElement.appendTo(element);
+
                 if (options.fadeFirst) {
-                    instance.currentImage.fadeIn(options.speed);
+                    domElement.fadeIn(options.speed);
                 } else {
-                    instance.currentImage.show();
+                    domElement.show();
                 }
 
                 instance.currentIndex++;
@@ -135,8 +159,9 @@
 
             var nextImage = $('#' + element.id + instance.currentIndex);
             if (nextImage.length) {
-                // image found in DOM, changing visibility                
-                instance.currentImage.fadeOut(options.speed);
+                // image found in DOM, changing visibility
+                var currentDomElement = this.getDomElement(instance.currentImage);
+                currentDomElement.fadeOut(options.speed);
                 nextImage.fadeIn(options.speed);
             } else {
                 // image was not loaded yet, loading and showing it                
@@ -156,35 +181,66 @@
         },
         preloadImage: function(element, options, index, style) {
             // preload image and return it as a jQuery object
+            // optionally process provided data object and generate custom html
             if (!style) {
                 style = 'display: none;';
+            }
+
+            var imageUrl = options.urls[index], imageAlt = options.alt, html = '';
+
+            if (typeof imageUrl === 'object') {
+
+                var generateCustomHTML = true;
+
+                // overwrite alt variable if alt property passed
+                if(imageUrl.alt) {
+                    imageAlt = imageUrl.alt;
+                }
+
+                // overwrite image url variable
+                if(imageUrl.src) {
+                    imageUrl = imageUrl.src;
+                } else {
+                    console.log('Please provide an src property for every object in urls array.');
+                    generateCustomHTML = false;
+                }
             }
 
             var img = $('<img />');
             img.attr({
                 'id': element.id + index,
-                'src': options.urls[index],
-                'alt': options.alt,
+                'src': imageUrl,
+                'alt': imageAlt,
                 'style': style
             });
-            return img;
+
+            if (generateCustomHTML) {
+                html = this.processCustomHTML(element, options, index, img);
+            }
+
+            return { 'img': img, 'html': html };
         },
         swapPreloadedImages: function(currentImage, nextImage, element, options, showLoader) {
+
             // swap images on load
+
+            var currentDomElement = this.getDomElement(currentImage);
+            var nextDomElement = this.getDomElement(nextImage);
 
             if (showLoader) {
                 // show loader
                 $(element).addClass('loading');
             }
 
-            nextImage.load(function() {
+            nextImage.img.load(function() {
                 if (showLoader) {
                     // hide loader
                     $(element).removeClass('loading');
                 }
-                nextImage.appendTo(element);
-                currentImage.fadeOut(options.speed);
-                nextImage.fadeIn(options.speed);
+
+                nextDomElement.appendTo(element);
+                currentDomElement.fadeOut(options.speed);
+                nextDomElement.fadeIn(options.speed);
             });
         },
         generateLinks: function(element, options, instance) {
@@ -279,9 +335,10 @@
             }
 
             var nextImage = $('#' + element.id + index);
+            var currentDomElement = this.getDomElement(instance.currentImage);
 
             // prevent action on active image
-            if (nextImage.attr('id') !== instance.currentImage.attr('id')) {
+            if (nextImage.attr('id') !== currentDomElement.attr('id')) {
 
                 instance.currentIndex = index;
 
@@ -292,7 +349,7 @@
 
                 if (nextImage.length) {
                     // image found in DOM, changing visibility                
-                    instance.currentImage.fadeOut(options.speed);
+                    currentDomElement.fadeOut(options.speed);
                     nextImage.fadeIn(options.speed);
                 } else {
                     // image was not loaded yet, loading and showing it                
@@ -325,6 +382,43 @@
                 instance.linkParent.find('a').removeClass('active');
                 instance.linkParent.find('a#' + element.id + '-link' + instance.currentIndex).addClass('active');
             }
+        },
+        processCustomHTML: function(element, options, index, img) {
+
+            var html = $('<div />'),
+                data = options.urls[index];
+
+            // swap id for image and parent html element for other methods to use it
+            html.attr('id', img.attr('id'));
+            img.attr('id', element.id + "-image-" + index);
+
+            // move default inline styles as well
+            html.attr('style', img.attr('style'));
+            img.removeAttr('style');
+
+            // add a class to the container element
+            html.addClass(element.id + "-html");
+
+            html.append(img);
+
+            html = options.onGenerateEachImage.call(this, html, data);
+
+            return html;
+        },
+        getDomElement: function(imageObject) {
+
+            // get dom element for the current image instance with fallback for BC
+            // needed to isolate consistency issues between image only and custom html states
+
+            if (imageObject instanceof jQuery) {
+                // fallback to existing dom element found by id
+                return imageObject;
+            }
+
+            // check for preloaded images attributes
+            var returnObject = (imageObject.html.length) ? imageObject.html : imageObject.img;
+
+            return returnObject;
         }
     };
 
