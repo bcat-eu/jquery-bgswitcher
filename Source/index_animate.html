@@ -24,6 +24,10 @@ $(document).ready(function() {
     prevnext: true,
     overrideChangeElement: function(options, $current, $next){
 
+      // fix possible problems if elements switched to quickly
+      $current.removeClass('animated bounceInLeft bounceOutRight').show();
+      $next.removeClass('animated bounceInLeft bounceOutRight').hide();
+
       $current.addClass('animated bounceOutRight');
       $current.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
         $current.removeClass('animated bounceOutRight');
