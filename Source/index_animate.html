@@ -24,7 +24,7 @@ $(document).ready(function() {
     prevnext: true,
     overrideChangeElement: function(options, $current, $next){
 
-      // fix possible problems if elements switched to quickly
+      // fix possible problems if elements switched too quickly
       $current.removeClass('animated bounceInLeft bounceOutRight').show();
       $next.removeClass('animated bounceInLeft bounceOutRight').hide();
 
