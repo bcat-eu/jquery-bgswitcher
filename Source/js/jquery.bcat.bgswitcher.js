@@ -1,6 +1,6 @@
 /**
  * bcat BG Switcher - unobtrusive background image switcher
- * @version 2.0.0
+ * @version 2.1.0
  * @jQuery version 1.2+
  * @author Yuriy Davats http://www.bcat.eu
  * @copyright Yuriy Davats
@@ -63,7 +63,17 @@
                  */
                 onGenerateEachImage: function($html, data) {
                     return $html;
-                }
+                },
+                /**
+                 * Callback to call instead of using standard logic when changing between old and new elements.
+                 * Must remain null if default logic to be used.
+                 *
+                 * JS default "this" variable
+                 * @param options - plugin options object
+                 * @param $current - jQuery instance for the current element
+                 * @param $next - jQuery instance for the current element
+                 */
+                overrideChangeElement: null,
 
             };
 
@@ -161,8 +171,7 @@
             if (nextImage.length) {
                 // image found in DOM, changing visibility
                 var currentDomElement = this.getDomElement(instance.currentImage);
-                currentDomElement.fadeOut(options.speed);
-                nextImage.fadeIn(options.speed);
+                this.changeElement(options, currentDomElement, nextImage);
             } else {
                 // image was not loaded yet, loading and showing it                
                 nextImage = this.preloadImage(element, options, instance.currentIndex);
@@ -226,6 +235,7 @@
 
             var currentDomElement = this.getDomElement(currentImage);
             var nextDomElement = this.getDomElement(nextImage);
+            var that = this;
 
             if (showLoader) {
                 // show loader
@@ -239,8 +249,7 @@
                 }
 
                 nextDomElement.appendTo(element);
-                currentDomElement.fadeOut(options.speed);
-                nextDomElement.fadeIn(options.speed);
+                that.changeElement(options, currentDomElement, nextDomElement);
             });
         },
         generateLinks: function(element, options, instance) {
@@ -348,9 +357,8 @@
                 }
 
                 if (nextImage.length) {
-                    // image found in DOM, changing visibility                
-                    currentDomElement.fadeOut(options.speed);
-                    nextImage.fadeIn(options.speed);
+                    // image found in DOM, changing visibility
+                    this.changeElement(options, currentDomElement, nextImage);
                 } else {
                     // image was not loaded yet, loading and showing it                
                     nextImage = this.preloadImage(element, options, instance.currentIndex);
@@ -404,6 +412,20 @@
             html = options.onGenerateEachImage.call(this, html, data);
 
             return html;
+        },
+        changeElement: function(options, current, next) {
+
+            // switch from current element to the next one
+
+            if(options.overrideChangeElement === null) {
+                current.fadeOut(options.speed);
+                next.fadeIn(options.speed);
+                return;
+            }
+
+            // there is an overrideChangeElement - trigger the callback
+            options.overrideChangeElement(options, current, next);
+
         },
         getDomElement: function(imageObject) {
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>jQuery Responsive Full Screen Background Image Switcher</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" media="all" />
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.0/animate.min.css" media="all" />
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.bcat.bgswitcher.js"></script>
+</head>
+<body>
+
+<div id="bg-body">
+</div>
+
+<script type="text/javascript">
+var srcBgArray = ["./images/img-slider-1.jpg","./images/img-slider-2.jpg","./images/img-slider-3.jpg","./images/img-slider-4.jpg"];
+
+$(document).ready(function() {
+  $('#bg-body').bcatBGSwitcher({
+    urls: srcBgArray,
+    alt: 'Full screen background image',
+    links: true,
+    prevnext: true,
+    overrideChangeElement: function(options, $current, $next){
+
+      $current.addClass('animated bounceOutRight');
+      $current.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+        $current.removeClass('animated bounceOutRight');
+        $current.hide();
+      });
+
+      $next.addClass('animated bounceInLeft');
+      $next.show();
+      $next.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+        $next.removeClass('animated bounceInLeft');
+      });
+
+    }
+  });
+});
+</script><!--end of bg-body script-->
+
+<div id="wrapper">
+
+<div id="info">
+<h1>Responsive full screen image switcher</h1>
+<p>This is a demo of the jQuery responsive full screen background image switcher with overrideChangeElement callback using animate.css animations.</p>
+<p>See <a href="http://www.bcat.eu/blog/jquery-unobtrusive-background-image-switcher/">this blog post</a> for details.</p>
+</div><!--end of info-->
+
+</div><!--end of Wrapper-->
+
+</body>
+</html>
