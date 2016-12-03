@@ -109,7 +109,7 @@
 
             var domElement = this.getDomElement(instance.currentImage);
 
-            instance.currentImage.img.load(function() {
+            instance.currentImage.img.on('load', function() {
 
                 domElement.appendTo(element);
 
@@ -242,7 +242,7 @@
                 $(element).addClass('loading');
             }
 
-            nextImage.img.load(function() {
+            nextImage.img.on('load', function() {
                 if (showLoader) {
                     // hide loader
                     $(element).removeClass('loading');
