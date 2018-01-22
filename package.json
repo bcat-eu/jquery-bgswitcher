@@ -35,6 +35,6 @@
   "repository": "https://github.com/bcat-eu/jquery-bgswitcher",
   "homepage": "http://www.bcat.eu/blog/jquery-unobtrusive-background-image-switcher/",
   "dependencies": {
-    "jquery": "^1.11"
+    "jquery": "^3.0.0"
   }
 }
